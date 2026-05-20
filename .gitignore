@@ -1,0 +1,8 @@
+# Claude Code secrets — never track these
+**/.credentials.json
+**/.claude.json
+**/mcp-needs-auth-cache.json
+
+# OS noise
+.DS_Store
+Thumbs.db
