@@ -1,56 +1,84 @@
 # dotfiles
 
-Personal config synced across machines. Currently tracks Claude Code and Alacritty settings.
+Personal config files, version-controlled and symlinked into place on each machine.
 
-## What's here
+This README is written so that a human **or an AI agent** (e.g. Claude Code) can set up a
+fresh machine quickly: every tracked config lists exactly where it installs to and the
+command to install it. See [CLAUDE.md](CLAUDE.md) for the rule that keeps this current.
 
+## Tracked configs
+
+| Config | Source in repo | Installs to |
+|---|---|---|
+| Claude Code | `claude/settings.json` | all OSes: `~/.claude/settings.json` |
+| Alacritty | `alacritty/alacritty.toml` | Windows: `%APPDATA%\alacritty\alacritty.toml`<br>macOS/Linux: `~/.config/alacritty/alacritty.toml` |
+
+## Prerequisites
+
+- **git**
+- **Windows only:** enable symlink creation without admin — **Settings → System → For developers → Developer Mode → On** (or run the install commands from an Administrator PowerShell).
+- macOS/Linux: no special step; `ln -s` works out of the box.
+
+## Quick start on a new machine
+
+```powershell
+# 1. Clone
+git clone https://github.com/austinshin/dotfiles.git "$env:USERPROFILE\code\dotfiles"
 ```
-claude/settings.json       # Claude Code config: theme, update channel, enabled plugins
-alacritty/alacritty.toml   # Alacritty terminal config
-.gitignore                 # excludes credentials + auth-cache files (never commit secrets)
+
+Then run the install block for each config below. Each one **replaces the live file with a
+symlink** into this repo (backing the original up to `*.bak` first), so future edits sync
+through git.
+
+### Claude Code → `~/.claude/settings.json`
+
+```powershell
+$t = "$env:USERPROFILE\code\dotfiles\claude\settings.json"
+$l = "$env:USERPROFILE\.claude\settings.json"
+New-Item -ItemType Directory -Force (Split-Path $l) | Out-Null
+if (Test-Path $l) { Copy-Item $l "$l.bak" -Force; Remove-Item $l -Force }
+New-Item -ItemType SymbolicLink -Path $l -Target $t
 ```
+```bash
+# macOS/Linux
+ln -sf ~/code/dotfiles/claude/settings.json ~/.claude/settings.json
+```
+After installing: restart Claude Code (or run `/reload-plugins`). Enabled plugins download
+automatically. MCP-backed plugins (`github`, `playwright`, `context7`) prompt for their own
+auth on first use, per machine.
 
-## Set up on a new machine
+### Alacritty → `%APPDATA%\alacritty\alacritty.toml`
 
-1. Clone the repo:
-   ```powershell
-   git clone https://github.com/austinshin/dotfiles.git "$env:USERPROFILE\code\dotfiles"
-   ```
-2. Enable symlinks (one-time): **Settings → System → For developers → Developer Mode → On**
-   (or run the symlink step from an Administrator PowerShell instead).
-3. Symlink the live config files to the tracked copies:
-   ```powershell
-   # Claude Code
-   $t="$env:USERPROFILE\code\dotfiles\claude\settings.json"
-   $l="$env:USERPROFILE\.claude\settings.json"
-   if (Test-Path $l) { Copy-Item $l "$l.bak" -Force; Remove-Item $l -Force }
-   New-Item -ItemType SymbolicLink -Path $l -Target $t
+```powershell
+$t = "$env:USERPROFILE\code\dotfiles\alacritty\alacritty.toml"
+$l = "$env:APPDATA\alacritty\alacritty.toml"
+New-Item -ItemType Directory -Force (Split-Path $l) | Out-Null
+if (Test-Path $l) { Copy-Item $l "$l.bak" -Force; Remove-Item $l -Force }
+New-Item -ItemType SymbolicLink -Path $l -Target $t
+```
+```bash
+# macOS/Linux
+mkdir -p ~/.config/alacritty
+ln -sf ~/code/dotfiles/alacritty/alacritty.toml ~/.config/alacritty/alacritty.toml
+```
+**Machine-specific caveat:** `alacritty.toml` hardcodes `working_directory = 'C:\Users\shina\code'`.
+On a machine with a different username or layout, edit that line after installing.
 
-   # Alacritty
-   $t="$env:USERPROFILE\code\dotfiles\alacritty\alacritty.toml"
-   $l="$env:APPDATA\alacritty\alacritty.toml"
-   New-Item -ItemType Directory -Force (Split-Path $l) | Out-Null
-   if (Test-Path $l) { Copy-Item $l "$l.bak" -Force; Remove-Item $l -Force }
-   New-Item -ItemType SymbolicLink -Path $l -Target $t
-   ```
-4. Restart Claude Code (or run `/reload-plugins`). Enabled plugins download automatically.
+## Making changes (propagating to your other machines)
 
-> MCP-backed plugins (`github`, `playwright`, `context7`) prompt for their own auth on first use per machine.
-
-## Making changes
-
-`~/.claude/settings.json` is a symlink into this repo, so editing your Claude settings
-edits `claude/settings.json` here directly. To propagate to your other machines:
+Because the live files are symlinks into this repo, editing a config edits the repo copy.
+To share the change:
 
 ```powershell
 git -C "$env:USERPROFILE\code\dotfiles" add -A
-git -C "$env:USERPROFILE\code\dotfiles" commit -m "Update Claude settings"
+git -C "$env:USERPROFILE\code\dotfiles" commit -m "Update <config>"
 git -C "$env:USERPROFILE\code\dotfiles" push
 ```
 
-On the other machine, `git pull` — the symlink reflects the new content automatically.
+On another machine, `git pull` — the symlink reflects the new content automatically.
 
 ## Secrets
 
-Never commit `~/.claude/.credentials.json` or auth-cache files. The `.gitignore`
-already excludes them; keep it that way.
+Never commit credentials or tokens. `.gitignore` already excludes Claude's
+`.credentials.json` and auth-cache files. When adding a config that may hold secrets,
+extend `.gitignore` before committing.
