@@ -13,13 +13,13 @@ claude/settings.json   # Claude Code config: theme, update channel, enabled plug
 
 1. Clone the repo:
    ```powershell
-   git clone https://github.com/austinshin/dotfiles.git "$env:USERPROFILE\Documents\dotfiles"
+   git clone https://github.com/austinshin/dotfiles.git "$env:USERPROFILE\code\dotfiles"
    ```
 2. Enable symlinks (one-time): **Settings → System → For developers → Developer Mode → On**
    (or run the symlink step from an Administrator PowerShell instead).
 3. Symlink the live Claude config to the tracked copy:
    ```powershell
-   $t="$env:USERPROFILE\Documents\dotfiles\claude\settings.json"
+   $t="$env:USERPROFILE\code\dotfiles\claude\settings.json"
    $l="$env:USERPROFILE\.claude\settings.json"
    if (Test-Path $l) { Copy-Item $l "$l.bak" -Force; Remove-Item $l -Force }
    New-Item -ItemType SymbolicLink -Path $l -Target $t
@@ -34,9 +34,9 @@ claude/settings.json   # Claude Code config: theme, update channel, enabled plug
 edits `claude/settings.json` here directly. To propagate to your other machines:
 
 ```powershell
-git -C "$env:USERPROFILE\Documents\dotfiles" add -A
-git -C "$env:USERPROFILE\Documents\dotfiles" commit -m "Update Claude settings"
-git -C "$env:USERPROFILE\Documents\dotfiles" push
+git -C "$env:USERPROFILE\code\dotfiles" add -A
+git -C "$env:USERPROFILE\code\dotfiles" commit -m "Update Claude settings"
+git -C "$env:USERPROFILE\code\dotfiles" push
 ```
 
 On the other machine, `git pull` — the symlink reflects the new content automatically.
