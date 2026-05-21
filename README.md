@@ -1,12 +1,13 @@
 # dotfiles
 
-Personal config synced across machines. Currently tracks Claude Code settings.
+Personal config synced across machines. Currently tracks Claude Code and Alacritty settings.
 
 ## What's here
 
 ```
-claude/settings.json   # Claude Code config: theme, update channel, enabled plugins
-.gitignore             # excludes credentials + auth-cache files (never commit secrets)
+claude/settings.json       # Claude Code config: theme, update channel, enabled plugins
+alacritty/alacritty.toml   # Alacritty terminal config
+.gitignore                 # excludes credentials + auth-cache files (never commit secrets)
 ```
 
 ## Set up on a new machine
@@ -17,10 +18,18 @@ claude/settings.json   # Claude Code config: theme, update channel, enabled plug
    ```
 2. Enable symlinks (one-time): **Settings → System → For developers → Developer Mode → On**
    (or run the symlink step from an Administrator PowerShell instead).
-3. Symlink the live Claude config to the tracked copy:
+3. Symlink the live config files to the tracked copies:
    ```powershell
+   # Claude Code
    $t="$env:USERPROFILE\code\dotfiles\claude\settings.json"
    $l="$env:USERPROFILE\.claude\settings.json"
+   if (Test-Path $l) { Copy-Item $l "$l.bak" -Force; Remove-Item $l -Force }
+   New-Item -ItemType SymbolicLink -Path $l -Target $t
+
+   # Alacritty
+   $t="$env:USERPROFILE\code\dotfiles\alacritty\alacritty.toml"
+   $l="$env:APPDATA\alacritty\alacritty.toml"
+   New-Item -ItemType Directory -Force (Split-Path $l) | Out-Null
    if (Test-Path $l) { Copy-Item $l "$l.bak" -Force; Remove-Item $l -Force }
    New-Item -ItemType SymbolicLink -Path $l -Target $t
    ```

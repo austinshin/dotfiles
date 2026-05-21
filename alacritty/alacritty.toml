@@ -1,0 +1,7 @@
+[general]
+working_directory = 'C:\Users\shina\code'
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"
